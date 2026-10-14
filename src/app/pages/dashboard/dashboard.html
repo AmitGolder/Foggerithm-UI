@@ -1,0 +1,252 @@
+
+<div class="app">
+  <header class="topbar">
+    <h1>Foggerithm<span>.</span></h1>
+
+    <div class="header-actions">
+      <span class="status"><i></i> Prototype</span>
+
+      <button
+        class="logout-button"
+        type="button"
+        (click)="logout()"
+      >
+        Sign out
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="welcome">
+      <p class="eyebrow">SMART FOGGER CONTROL</p>
+      <h2>Your greenhouse,<br />under control.</h2>
+      <p>Manage your fogger from anywhere.</p>
+    </section>
+
+    <section class="device-card">
+      <div class="device-heading">
+        <div>
+          <p class="muted">YOUR DEVICE</p>
+          <h3>
+            {{ hasDevice ? 'Greenhouse Fogger 01' : 'No device assigned' }}
+          </h3>
+        </div>
+
+        <span
+          class="online"
+          [class.disconnected]="!isApiReachable"
+        >
+          <i></i>
+          {{ isApiReachable ? 'API connected' : 'API offline' }}
+        </span>
+      </div>
+
+      @if (hasDevice) {
+        <div class="fogger-status">
+          <div class="fog-icon">≈</div>
+
+          <p class="muted">FOGGER STATUS</p>
+          <h2>{{ isFoggerOn ? 'ON' : 'OFF' }}</h2>
+
+          <p class="muted">
+            {{ isDeviceConnected
+              ? 'Device connection established'
+              : 'Simulation mode — no hardware connected' }}
+          </p>
+        </div>
+
+        <button
+          class="power-button"
+          type="button"
+          (click)="toggleFogger()"
+          [disabled]="
+            !hasDevice ||
+            !isApiReachable ||
+            isPowerRequestRunning
+          "
+        >
+          {{ isPowerRequestRunning
+            ? 'Sending command...'
+            : isFoggerOn ? 'Turn fogger off' : 'Turn fogger on' }}
+        </button>
+
+        <div class="device-info">
+          <div>
+            <span>Connection</span>
+            <strong>
+              {{ isDeviceConnected ? 'Connected' : 'Offline' }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Automation</span>
+            <strong>
+              {{ isDeviceConnected ? 'Device connected' : 'Local simulation' }}
+            </strong>
+          </div>
+        </div>
+      } @else {
+        <div class="fogger-status">
+          <div class="fog-icon">≈</div>
+          <p class="muted">DEVICE STATUS</p>
+          <h2>Unavailable</h2>
+          <p class="muted">
+            Assign a fogger to this account to control it.
+          </p>
+        </div>
+
+        <button
+          class="power-button"
+          type="button"
+          disabled
+        >
+          No device assigned
+        </button>
+      }
+    </section>
+
+    @if (apiError) {
+      <p class="error-message" role="alert">
+        {{ apiError }}
+      </p>
+    }
+
+    <section class="section-heading">
+      <div>
+        <p class="eyebrow">AUTOMATION</p>
+        <h2>Quick controls</h2>
+      </div>
+    </section>
+
+    <section class="quick-grid">
+      <article class="quick-card">
+        <span class="card-icon">◷</span>
+        <h3>Countdown timer</h3>
+        <p>Run the fogger for a chosen duration.</p>
+
+        <label for="timerMinutes">Duration (minutes)</label>
+
+        <input
+          id="timerMinutes"
+          type="number"
+          name="timerMinutes"
+          min="1"
+          max="1440"
+          [(ngModel)]="timerMinutes"
+          [disabled]="timerRunning"
+        />
+
+        @if (timerRunning) {
+          <p class="timer-display">
+            Time remaining: {{ formattedTime }}
+          </p>
+
+          <button
+            class="secondary-button"
+            type="button"
+            (click)="stopTimer()"
+          >
+            Cancel timer
+          </button>
+        } @else {
+          <button
+            class="secondary-button"
+            type="button"
+            (click)="startTimer()"
+            [disabled]="
+              !hasDevice ||
+              !isApiReachable ||
+              timerMinutes < 1 ||
+              timerMinutes > 1440
+            "
+          >
+            Start timer
+          </button>
+        }
+      </article>
+
+      <article class="quick-card">
+        <span class="card-icon">▦</span>
+        <h3>Daily schedules</h3>
+        <p>Set recurring fogging sessions for every day.</p>
+
+        <form (ngSubmit)="addSchedule()">
+          <label for="scheduleTime">Start time</label>
+
+          <input
+            id="scheduleTime"
+            type="time"
+            name="scheduleTime"
+            [(ngModel)]="newScheduleTime"
+            required
+          />
+
+          <label for="scheduleDuration">Duration (minutes)</label>
+
+          <input
+            id="scheduleDuration"
+            type="number"
+            name="scheduleDuration"
+            min="1"
+            max="1440"
+            [(ngModel)]="newScheduleDuration"
+            required
+          />
+
+          <button
+            class="secondary-button"
+            type="submit"
+            [disabled]="
+              !hasDevice ||
+              !isApiReachable ||
+              newScheduleDuration < 1 ||
+              newScheduleDuration > 1440
+            "
+          >
+            Add daily schedule
+          </button>
+        </form>
+
+        <div class="schedule-list">
+          @for (schedule of schedules; track schedule.id) {
+            <div class="schedule-item">
+              <div class="schedule-details">
+                <strong>{{ schedule.time }}</strong>
+                <span>{{ schedule.duration }} minutes · Daily</span>
+              </div>
+
+              <label class="schedule-toggle">
+                <input
+                  type="checkbox"
+                  [checked]="schedule.enabled"
+                  (change)="toggleSchedule(schedule.id)"
+                />
+                <span>
+                  {{ schedule.enabled ? 'Enabled' : 'Disabled' }}
+                </span>
+              </label>
+
+              <button
+                class="delete-button"
+                type="button"
+                (click)="deleteSchedule(schedule.id)"
+                aria-label="Delete schedule"
+              >
+                Delete
+              </button>
+            </div>
+          } @empty {
+            <p class="empty-state">No schedules added yet.</p>
+          }
+        </div>
+
+        <div class="execution-status">
+          <span class="status-dot"></span>
+          <span>{{ lastExecutionMessage }}</span>
+        </div>
+      </article>
+    </section>
+
+    <footer>FOGGERITHM · SMART GROWING, SIMPLIFIED</footer>
+  </main>
+</div>

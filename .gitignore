@@ -1,0 +1,58 @@
+
+# Dependencies
+node_modules/
+
+# Angular build output and caches
+dist/
+out-tsc/
+.angular/
+coverage/
+.nyc_output/
+
+# Environment files and local configuration
+.env
+.env.*
+!.env.example
+
+# Local Angular environment variants
+src/environments/environment.local.ts
+src/environments/environment.*.local.ts
+
+# Local credentials and certificates
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# IDE and editor files
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+*.log
+
+# Test output
+test-results/
+playwright-report/
+.nyc_output/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary and backup files
+*.tmp
+*.temp
+*.bak
+*~

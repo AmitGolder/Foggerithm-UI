@@ -1,0 +1,92 @@
+
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="brand">
+      <div class="brand-icon">F</div>
+      <h1>Foggerithm</h1>
+      <p>Smart control for your growing environment</p>
+    </div>
+
+    <h2>Create your account</h2>
+    <p class="subtitle">Register to manage your fogger devices.</p>
+
+    <div class="error-message" *ngIf="errorMessage" role="alert">
+      {{ errorMessage }}
+    </div>
+
+    <div class="success-message" *ngIf="successMessage" role="status">
+      {{ successMessage }}
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <label for="fullName">Full name</label>
+      <input
+        id="fullName"
+        type="text"
+        formControlName="fullName"
+        placeholder="Your full name"
+        autocomplete="name"
+      />
+
+      <small
+        class="field-error"
+        *ngIf="registerForm.controls.fullName.touched &&
+               registerForm.controls.fullName.invalid"
+      >
+        Enter a name between 2 and 100 characters.
+      </small>
+
+      <label for="email">Email address</label>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        placeholder="you@example.com"
+        autocomplete="email"
+      />
+
+      <small
+        class="field-error"
+        *ngIf="registerForm.controls.email.touched &&
+               registerForm.controls.email.invalid"
+      >
+        Enter a valid email address.
+      </small>
+
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        placeholder="At least 8 characters"
+        autocomplete="new-password"
+      />
+
+      <small
+        class="field-error"
+        *ngIf="registerForm.controls.password.touched &&
+               registerForm.controls.password.invalid"
+      >
+        Password must contain at least 8 characters.
+      </small>
+
+      <label for="confirmPassword">Confirm password</label>
+      <input
+        id="confirmPassword"
+        type="password"
+        formControlName="confirmPassword"
+        placeholder="Re-enter your password"
+        autocomplete="new-password"
+      />
+
+      <button type="submit" [disabled]="loading">
+        {{ loading ? 'Creating account...' : 'Create account' }}
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      Already have an account?
+      <a routerLink="/login">Sign in</a>
+    </p>
+  </div>
+</div>
